@@ -3,11 +3,16 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-import petsc4py
 import sys
 
-petsc4py.init(sys.argv)
-from petsc4py import PETSc
+try:
+    import petsc4py
+    petsc4py.init(sys.argv)
+    from petsc4py import PETSc
+
+    haspetsc = True
+except:
+    haspetsc = False
 
 import scipy.sparse as spsp
 
@@ -15,10 +20,18 @@ import scipy.sparse as spsp
 class PetscWrapper():
 
     def __init__(self):
+
+        if not haspetsc:
+            raise NotImplementedError("petsc4py not supported")
+
         self.solverType = []
         self.H_inv = []
 
-    def factorize(self, H, solverType, comm=PETSc.COMM_WORLD):
+    def factorize(self, H, solverType, comm=None):
+        
+        if comm is None:
+            comm = PETSc.COMM_WORLD
+        
         self.solverType = solverType
         
         # check if H is a csr matrix otherwise converts H into csr format
