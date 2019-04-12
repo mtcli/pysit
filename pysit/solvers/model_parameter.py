@@ -1,4 +1,5 @@
 import itertools
+import scipy.sparse as spsp
 
 import numpy as np
 
@@ -532,6 +533,65 @@ class ModelPerturbationBase(object):
             result.data[newsl] += self.mesh.unpad_array(self.data[oldsl])
 
         return result
+
+    def add_padding(self):
+
+        d_shape_in = self.mesh._shapes[(True, True)]
+        d_shape_out = self.mesh._shapes[(False, True)]
+        data_in = self.data.reshape(d_shape_in)
+
+        if self.mesh.dim == 1:
+            n_z_lb = self.mesh.z['lbc']._n
+            n_z_rb = self.mesh.z['rbc']._n
+            
+
+            data_out = self.data[n_z_lb: n_z_lb+d_shape_out[0]]
+            data_out[0] = data_out[0] + np.sum(self.data[0:n_z_lb])
+            data_out[d_shape_out[0]-1] = data_out[d_shape_out[0]-1] + np.sum(self.data[n_z_lb+d_shape_out[0]: d_shape_in[0]])
+
+        elif self.mesh.dim == 2:
+            n_z_lb = self.mesh.z['lbc']._n
+            n_z_rb = self.mesh.z['rbc']._n
+            n_x_lb = self.mesh.x['lbc']._n
+            n_x_rb = self.mesh.x['rbc']._n
+
+            data_in[n_x_lb, :] = data_in[n_x_lb, :] + np.sum(data_in[0:n_x_lb, :], axis=0)
+            data_in[n_x_lb+d_shape_out[0]-1, :] = data_in[n_x_lb+d_shape_out[0]-1, :] \
+                                                  + np.sum(data_in[n_x_lb+d_shape_out[0]: d_shape_in[0], :], axis=0)
+            data_in[:, n_z_lb] = data_in[:, n_z_lb] + np.sum(data_in[:, 0:n_z_lb], axis=1)
+            data_in[:, n_z_lb+d_shape_out[1]-1] = data_in[:, n_z_lb+d_shape_out[1]-1] \
+                                                  + np.sum(data_in[:, n_z_lb+d_shape_out[1]: d_shape_in[1]], axis=1)
+
+            data_out = data_in[n_x_lb:n_x_lb+d_shape_out[0], n_z_lb:n_z_lb+d_shape_out[1]]
+
+        else:
+
+            n_z_lb = self.mesh.z['lbc']._n
+            n_z_rb = self.mesh.z['rbc']._n
+            n_x_lb = self.mesh.x['lbc']._n
+            n_x_rb = self.mesh.x['rbc']._n
+            n_y_lb = self.mesh.y['lbc']._n
+            n_y_rb = self.mesh.y['rbc']._n
+
+            data_in[n_x_lb, :, :] = data_in[n_x_lb, :, :] + np.sum(data_in[0:n_x_lb, :, :], axis=0)
+            data_in[n_x_lb+d_shape_out[0]-1, :, :] = data_in[n_x_lb+d_shape_out[0]-1, :, :] \
+                                                    + np.sum(data_in[n_x_lb+d_shape_out[0]: d_shape_in[0], :, :], axis=0)
+            data_in[:, n_y_lb, :] = data_in[:, n_y_lb, :] + np.sum(data_in[:, 0:n_y_lb, :], axis=1)
+            data_in[:, n_y_lb+d_shape_out[1]-1, :] = data_in[:, n_y_lb+d_shape_out[1]-1, :] \
+                                                    + np.sum(data_in[:, n_y_lb+d_shape_out[1]: d_shape_in[1], :], axis=1)
+            data_in[:, :, n_z_lb] = data_in[:, :, n_z_lb] + np.sum(data_in[:, :, 0:n_z_lb], axis=2)
+            data_in[:, :, n_z_lb+d_shape_out[2]-1] = data_in[:, :, n_z_lb+d_shape_out[2] - 1] \
+                                                    + np.sum(data_in[:, :, n_z_lb+d_shape_out[2]: d_shape_in[2]], axis=2)
+
+            data_out = data_in[n_x_lb:n_x_lb+d_shape_out[0],
+                               n_y_lb:n_y_lb+d_shape_out[1], 
+                               n_z_lb:n_z_lb+d_shape_out[2]]
+
+        result = type(self)(self.mesh, padded=False, dtype=self.dtype)
+        result.data = data_out.reshape((np.prod(d_shape_out), 1))
+
+        return result
+
 
     def __add__(self, rhs):
         # iterables of scalars, so models can be rescaled differently are OK

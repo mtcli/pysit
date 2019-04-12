@@ -47,7 +47,7 @@ if __name__ == '__main__':
     zpos = zmin + (1./9.)*zmax
 
     Nshots = size
-    sys.stdout.write("{0}: {1}\n".format(rank, Nshots / size))
+    sys.stdout.write("{0}: {1}\n".format(rank, Nshots // size))
 
     shots = equispaced_acquisition(m,
                                    RickerWavelet(10.0),
@@ -117,7 +117,7 @@ if __name__ == '__main__':
                     line_search=line_search,
                     status_configuration=status_configuration, verbose=True)
 
-    print 'Run time:  {0}s'.format(time.time()-tt)
+    print('Run time:  {0}s'.format(time.time()-tt))
 
 
     if rank == 0:

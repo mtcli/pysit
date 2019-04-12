@@ -196,7 +196,7 @@ class SourceEncodedSupershot(Shot):
                 
                 """
                 
-                super(EncodedSourceSet, self).__init__(mesh, sources, **kwargs)
+                super().__init__(self, mesh, sources, **kwargs)
                 self.time_coded = time_coded
                 
                 if not time_coded:
@@ -208,16 +208,16 @@ class SourceEncodedSupershot(Shot):
                 ret = None
                 if self.time_coded and nu == None: 
                     #We already set the codes in encode(). They have not changed, so no need to reapply.
-                    ret = super(EncodedSourceSet, self ).f(t, nu, **kwargs )
+                    ret = super().f(self, t, nu, **kwargs )
                 elif not self.time_coded and nu != None:
                     #Set the codes for this frequency. Not much of an overhead since no timestepping.
                     #In contrast to a time simulation, the intensity (used for code) has to be set again each time frequencies are varied. Each frequency can have a different code.
                     
-                    for source_nr in xrange(self.source_count):
+                    for source_nr in range(self.source_count):
                         source = self.source_list[source_nr]
                         source.intensity = self.codes[nu][source_nr]                        
                         
-                    ret = super(EncodedSourceSet, self ).f(t, nu, **kwargs )
+                    ret = super().f(self, t, nu, **kwargs )
                     
                 else:
                     raise Exception("Something strange happened")
@@ -237,7 +237,7 @@ class SourceEncodedSupershot(Shot):
                     
                     #Set the codes here already. Applying them at each time step when f() is called is an overhead.
                     
-                    for source_nr in xrange(self.source_count):
+                    for source_nr in range(self.source_count):
                         source = self.source_list[source_nr]
                         source.intensity = self.codes[source_nr]
                         
