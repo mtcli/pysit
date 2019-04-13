@@ -48,10 +48,10 @@ class ConstantDensityAcousticTimeScalar_2D(ConstantDensityAcousticTimeScalarBase
             if self.mesh.x.lbc.domain_bc.compact:
                 raise NotImplementedError('Compact option is not available for time solvers')
 
-        lpmlz_tmp = self.mesh.z.lbc.sigma.copy()
-        self.mesh.z.lbc.sigma = lpmlz_tmp.copy()
-        lpmlx_tmp = self.mesh.x.lbc.sigma.copy()
-        self.mesh.x.lbc.sigma = lpmlx_tmp.copy()
+#         lpmlz_tmp = self.mesh.z.lbc.sigma.copy()
+#         self.mesh.z.lbc.sigma = lpmlz_tmp.copy()
+#         lpmlx_tmp = self.mesh.x.lbc.sigma.copy()
+#         self.mesh.x.lbc.sigma = lpmlx_tmp.copy()
 
     def _rebuild_operators(self):
 

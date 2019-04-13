@@ -49,6 +49,7 @@ setuptools-*.tar.gz
 .coverage
 cover
 htmlcov
+petsc-3.9.1
 
 # Mac OSX
 .DS_Store
