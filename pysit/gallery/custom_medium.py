@@ -60,12 +60,22 @@ class CustomMediumModel(GeneratedGalleryModel):
         sh = self._mesh.shape(as_grid=True)
         grid = self._mesh.mesh_coords() # retrieve meshgrid
 
-        C0 = self.C0_model(grid[0], grid[1]).reshape(sh)
+        if self.domain.dim==1:
+            C0 = self.C0_model(grid[0])
+        elif self.domain.dim==2:
+            C0 = self.C0_model(grid[0], grid[1]).reshape(sh)
+        elif self.domain.dim==3:
+            C0 = self.C0_model(grid[0], grid[1], grid[2]).reshape(sh)
 
         self._initial_model = C0
 
         if self.dC_model is not None:
-            dC = self.dC_model(grid[0], grid[1]).reshape(sh)
+            if self.domain.dim==1:
+                dC = self.dC_model(grid[0])
+            elif self.domain.dim==2:
+                dC = self.dC_model(grid[0], grid[1]).reshape(sh)
+            elif self.domain.dim==3:
+                dC = self.dC_model(grid[0], grid[1], grid[2]).reshape(sh)
 
             self._true_model = C0+dC
         else:
